@@ -1,0 +1,882 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Unterrichts-Player (HTML)</title>
+  <style>
+    :root{
+      --bg0:#06131f; --bg1:#0a2a3f;
+      --line: rgba(255,255,255,.12);
+      --text: rgba(240,248,255,.92); --muted: rgba(240,248,255,.65);
+      --shadow: rgba(0,0,0,.35);
+      --r: 18px;
+
+      --dockH: 120px; /* wird per JS überschrieben */
+      --pad: 12px;
+    }
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; margin:0; color:var(--text);
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial; }
+    body{
+      background: radial-gradient(1200px 900px at 60% 20%, #0b3350 0%, var(--bg1) 35%, var(--bg0) 80%);
+      overflow:hidden;
+    }
+
+    /* Content area (keine Top-Leiste) */
+    #app{
+      position:fixed; inset:0;
+      padding: var(--pad);
+      padding-bottom: calc(var(--dockH) + var(--pad) + 6px); /* Content nicht unter Dock */
+      z-index:1;
+      display:flex;
+      min-height:0;
+    }
+
+    .slideCard{
+      flex:1;
+      min-height:0;
+      border-radius:var(--r);
+      background: linear-gradient(180deg, rgba(255,255,255,.06) 0%, rgba(255,255,255,.03) 100%);
+      border:1px solid var(--line);
+      box-shadow: 0 20px 60px var(--shadow);
+      overflow:hidden;
+      position:relative;
+    }
+
+    /* optionales Background-Image pro Folie */
+    #bgLayer{
+      position:absolute; inset:0;
+      background-position:center;
+      background-size:cover;
+      opacity:.16;
+      filter: blur(1px) saturate(1.05);
+      transform: scale(1.02);
+      pointer-events:none;
+    }
+    .slideCard::before{
+      content:""; position:absolute; inset:0;
+      background:
+        radial-gradient(900px 600px at 20% 10%, rgba(120,220,255,.10), transparent 60%),
+        radial-gradient(800px 700px at 80% 30%, rgba(180,255,240,.06), transparent 60%);
+      pointer-events:none;
+    }
+
+    .slide{
+      position:absolute; inset:0;
+      padding:28px 28px 22px;
+      display:none;
+      overflow:hidden;
+    }
+    .slide.active{ display:block; }
+
+    /* Standard-Typo (Content kann inline noch stärker layouten) */
+    .slide h1{ margin:0 0 12px; font-size:36px; }
+    .slide h2{ margin:0 0 10px; font-size:26px; }
+    .slide h3{ margin:0 0 8px; font-size:18px; color: rgba(240,248,255,.88); }
+    .slide p{ margin:0 0 12px; color:var(--muted); font-size:15px; line-height:1.5; max-width:80ch; }
+    .slide ul, .slide ol{ margin:10px 0 0 18px; line-height:1.6; color: rgba(240,248,255,.86); }
+    .slide img{ max-width:100%; height:auto; display:block; }
+
+    .badge{
+      display:inline-flex; align-items:center; gap:8px;
+      padding:8px 10px; border-radius:999px;
+      background: rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.10);
+      color: var(--muted);
+      font-size:12px;
+    }
+
+    /* Canvas: von oben bis über Dock */
+    #inkCanvas{
+      position:fixed;
+      left:0; top:0;
+      width:100vw;
+      height: calc(100vh - var(--dockH));
+      z-index:50;
+      background: transparent;
+      touch-action:none;
+      pointer-events:auto;
+    }
+    #inkCanvas.passThrough{ pointer-events:none; }
+
+    .btn{
+      appearance:none; border:none; cursor:pointer;
+      border-radius:999px; padding:9px 12px;
+      background: rgba(255,255,255,.07);
+      border: 1px solid rgba(255,255,255,.10);
+      color: rgba(240,248,255,.90);
+      font-size: 12px;
+      user-select:none;
+      white-space:nowrap;
+    }
+    .btn:hover{ border-color: rgba(255,255,255,.18); }
+    .btn.primary{ background: rgba(120,220,255,.14); border-color: rgba(120,220,255,.28); }
+    .btn.danger{ background: rgba(255,120,120,.10); border-color: rgba(255,120,120,.22); }
+
+    .seg{
+      display:inline-flex; border-radius:999px; overflow:hidden;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.06);
+    }
+    .seg .btn{ border:0; border-radius:0; background: transparent; }
+    .seg .btn.active{ background: rgba(120,220,255,.16); }
+
+    .slider{
+      display:flex; align-items:center; gap:8px;
+      padding:6px 10px;
+      border-radius:999px;
+      background: rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.10);
+    }
+    .slider span{ color:rgba(240,248,255,.70); font-size:12px; min-width:52px; text-align:right; font-variant-numeric: tabular-nums; }
+    input[type="range"]{ width: 130px; }
+
+    .swatches{
+      display:flex; gap:8px; align-items:center; flex-wrap:wrap;
+      padding:6px 8px; border-radius:999px;
+      background: rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.10);
+    }
+    .swatch{
+      width:22px; height:22px; border-radius:999px;
+      border:1px solid rgba(255,255,255,.22);
+      box-shadow: 0 10px 25px rgba(0,0,0,.20);
+      cursor:pointer;
+      position:relative;
+    }
+    .swatch.active::after{
+      content:""; position:absolute; inset:-3px;
+      border-radius:999px;
+      border:2px solid rgba(120,220,255,.75);
+      box-shadow: 0 0 16px rgba(120,220,255,.25);
+    }
+
+    .pill{
+      padding:7px 10px; border-radius:999px;
+      background: rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.10);
+      color: rgba(240,248,255,.82);
+      font-size:12px;
+      user-select:none;
+      white-space:nowrap;
+      max-width: 36vw;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .pill b{ color: rgba(240,248,255,.95); }
+
+    /* Bottom Dock: Navigation + Tools zusammen */
+    #dock{
+      position:fixed;
+      left:var(--pad); right:var(--pad); bottom:var(--pad);
+      z-index:95;
+      border-radius:18px;
+      background: rgba(10, 28, 42, .70);
+      border:1px solid rgba(255,255,255,.12);
+      box-shadow: 0 20px 60px rgba(0,0,0,.45);
+      padding:10px 10px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+      pointer-events:auto;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+
+    .dockLeft, .dockMid, .dockRight{
+      display:flex; align-items:center; gap:8px; flex-wrap:wrap;
+      min-width: 0;
+    }
+    .dockLeft{ flex: 1 1 260px; }
+    .dockMid{  flex: 2 1 560px; justify-content:center; }
+    .dockRight{flex: 1 1 280px; justify-content:flex-end; }
+
+    .counter{ color:rgba(240,248,255,.70); font-size:12px; font-variant-numeric: tabular-nums; }
+
+    /* kleine Hilfskarte im Content */
+    .softBox{
+      background: rgba(255,255,255,.05);
+      border: 1px solid rgba(255,255,255,.10);
+      border-radius: 16px;
+      padding: 14px;
+    }
+
+    @media (max-width: 1000px){
+      .dockMid{ justify-content:flex-start; }
+      input[type="range"]{ width: 110px; }
+      .pill{ max-width: 70vw; }
+    }
+  </style>
+</head>
+
+<body>
+  <canvas id="inkCanvas"></canvas>
+
+  <div id="app">
+    <section class="slideCard" id="slideCard" aria-label="Präsentationsfläche">
+      <div id="bgLayer" aria-hidden="true"></div>
+
+      <!-- Fallback / Loading -->
+      <section class="slide active" data-id="loading" data-title="Laden …">
+        <div class="badge">Unterrichts-Player</div>
+        <h1>Lade Inhalte …</h1>
+        <p style="max-width:80ch">
+          Tipp: Starte diese Datei am besten über einen lokalen Server (z. B. VS Code “Live Server”),
+          damit <code>fetch()</code> Content-Dateien laden darf.
+        </p>
+        <div class="softBox">
+          <p style="margin:0 0 8px"><b>Verwendung</b></p>
+          <ul style="margin:0 0 0 18px">
+            <li><code>player.html?deck=content.html</code></li>
+            <li><code>player.html?deck=content_katalysatoren.html</code></li>
+          </ul>
+        </div>
+      </section>
+    </section>
+  </div>
+
+  <!-- Dock: Navigation integriert -->
+  <div id="dock" role="toolbar" aria-label="Navigation und Tools">
+    <div class="dockLeft">
+      <button class="btn" id="prevBtn" title="Zurück (←)">←</button>
+      <button class="btn" id="nextBtn" title="Weiter (→)">→</button>
+      <span class="pill">Folie <b id="slideNum">–</b></span>
+      <span class="counter"><span id="counter">–</span> / <span id="total">–</span></span>
+      <span class="pill" id="titlePill" title="Folientitel">Titel: <b id="slideTitle">–</b></span>
+      <span class="pill" id="inkStatus">Ink: <b>AN</b></span>
+    </div>
+
+    <div class="dockMid">
+      <div class="seg" role="group" aria-label="Ink an/aus">
+        <button class="btn active" id="inkOnBtn">Ink AN</button>
+        <button class="btn" id="inkOffBtn">Ink AUS</button>
+      </div>
+
+      <div class="seg" role="group" aria-label="Render">
+        <button class="btn active" id="fastBtn">FAST</button>
+        <button class="btn" id="hdBtn">HD</button>
+      </div>
+
+      <div class="seg" role="group" aria-label="Tool">
+        <button class="btn active" id="penBtn">Stift</button>
+        <button class="btn" id="eraserBtn">Radierer</button>
+      </div>
+
+      <div class="swatches" id="swatches" aria-label="Farbpalette"></div>
+
+      <div class="slider" title="Strichstärke">
+        <span id="sizeLabel">6px</span>
+        <input id="size" type="range" min="1" max="26" step="1" value="6" />
+      </div>
+
+      <div class="seg" role="group" aria-label="Palm rejection">
+        <button class="btn active" id="penOnlyBtn">Nur Stift</button>
+        <button class="btn" id="allowTouchBtn">Touch</button>
+      </div>
+    </div>
+
+    <div class="dockRight">
+      <span class="pill" id="toolStatus">Tool: <b>Stift</b></span>
+      <span class="pill" id="inputStatus">Input: <b>Pen-only</b></span>
+      <span class="pill" id="dprStatus">Render: <b>FAST</b></span>
+      <button class="btn" id="undoBtn">Undo</button>
+      <button class="btn" id="redoBtn">Redo</button>
+      <button class="btn danger" id="clearBtn">Clear</button>
+      <button class="btn primary" id="exportBtn">Export</button>
+    </div>
+  </div>
+
+<script>
+(() => {
+  /** ---------------- Helpers ---------------- */
+  const qs = new URLSearchParams(location.search);
+  const deckUrl = qs.get("deck") || "content.html";
+
+  function deckIdFromUrl(url){
+    // dateiname ohne query/hash/extension, grob sanitizen
+    try{
+      const clean = url.split("#")[0].split("?")[0];
+      const name = clean.split("/").pop() || "deck";
+      return name.replace(/\.[a-z0-9]+$/i, "").replace(/[^a-z0-9_-]+/gi, "_").slice(0, 60) || "deck";
+    } catch {
+      return "deck";
+    }
+  }
+  const deckId = deckIdFromUrl(deckUrl);
+
+  const slideCardEl = document.getElementById("slideCard");
+  const bgLayerEl = document.getElementById("bgLayer");
+
+  const totalEl = document.getElementById("total");
+  const counterEl = document.getElementById("counter");
+  const slideNumEl = document.getElementById("slideNum");
+  const slideTitleEl = document.getElementById("slideTitle");
+
+  let slides = [...document.querySelectorAll(".slide")];
+  let total = slides.length;
+  let slideIndex = 0;
+
+  /** ---------------- Slides: content loader ---------------- */
+  async function loadContent(url){
+    try{
+      const res = await fetch(url, { cache: "no-store" });
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      const html = await res.text();
+
+      const doc = new DOMParser().parseFromString(html, "text/html");
+      const importedSlides = [...doc.querySelectorAll(".slide")];
+
+      // remove old slides but keep bgLayer
+      [...slideCardEl.querySelectorAll(".slide")].forEach(n => n.remove());
+
+      if (!importedSlides.length){
+        const err = document.createElement("section");
+        err.className = "slide active";
+        err.dataset.id = "error_no_slides";
+        err.dataset.title = "Fehler";
+        err.innerHTML = `
+          <div class="badge">Fehler</div>
+          <h1>Keine .slide Elemente in ${escapeHtml(url)} gefunden</h1>
+          <p>Lege in der Inhaltsdatei <code>&lt;section class="slide"&gt;...&lt;/section&gt;</code> an.</p>
+        `;
+        slideCardEl.appendChild(err);
+      } else {
+        importedSlides.forEach((s, i) => {
+          // ensure required class + hide by default
+          s.classList.add("slide");
+          s.classList.toggle("active", i === 0);
+          // safety: if slide has <script>, remove it
+          s.querySelectorAll("script").forEach(sc => sc.remove());
+          slideCardEl.appendChild(s);
+        });
+      }
+
+      slides = [...slideCardEl.querySelectorAll(".slide")];
+      total = slides.length;
+
+      totalEl.textContent = String(total);
+      showSlide(0);
+
+    } catch (e){
+      [...slideCardEl.querySelectorAll(".slide")].forEach(n => n.remove());
+      const err = document.createElement("section");
+      err.className = "slide active";
+      err.dataset.id = "error_fetch";
+      err.dataset.title = "Fehler";
+      err.innerHTML = `
+        <div class="badge">Fehler beim Laden</div>
+        <h1>Konnte <code>${escapeHtml(url)}</code> nicht laden</h1>
+        <p style="max-width:80ch">
+          Ursache häufig: Datei per Doppelklick (file://). Nutze einen lokalen Server (z.B. VS Code “Live Server”).
+        </p>
+        <div class="softBox">
+          <p style="margin:0 0 6px"><b>Technischer Hinweis</b></p>
+          <p style="margin:0; color: rgba(240,248,255,.75)">${escapeHtml(String(e))}</p>
+        </div>
+      `;
+      slideCardEl.appendChild(err);
+      slides = [err];
+      total = 1;
+      totalEl.textContent = "1";
+      showSlide(0);
+    }
+  }
+
+  function escapeHtml(s){
+    return s.replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;" }[c]));
+  }
+
+  /** ---------------- Dock height -> Canvas height ---------------- */
+  const dockEl = document.getElementById("dock");
+  const inkCanvas = document.getElementById("inkCanvas");
+
+  function measureDock(){
+    const h = dockEl.getBoundingClientRect().height || 0;
+    const pad = 12;
+    document.documentElement.style.setProperty("--dockH", (h + pad*2) + "px");
+    notes.resizeCanvasBuffer();
+  }
+  const ro = new ResizeObserver(() => measureDock());
+  ro.observe(dockEl);
+  window.addEventListener("resize", measureDock, { passive: true });
+
+  /** ---------------- Slides: navigation ---------------- */
+  function currentSlideMeta(){
+    const s = slides[slideIndex];
+    const title = s?.dataset?.title || "";
+    const id = s?.dataset?.id || "";
+    const bg = s?.dataset?.bg || "";
+    return { title, id, bg };
+  }
+
+  function applyBg(bg){
+    if (bg){
+      bgLayerEl.style.backgroundImage = `url("${bg}")`;
+      bgLayerEl.style.display = "block";
+    } else {
+      bgLayerEl.style.backgroundImage = "none";
+      bgLayerEl.style.display = "none";
+    }
+  }
+
+  function showSlide(i){
+    slideIndex = (i + total) % total;
+    slides.forEach((s, idx) => s.classList.toggle("active", idx === slideIndex));
+
+    const { title, id, bg } = currentSlideMeta();
+    counterEl.textContent = String(slideIndex + 1);
+    slideNumEl.textContent = String(slideIndex + 1);
+    slideTitleEl.textContent = title || (id ? id : "–");
+    applyBg(bg);
+
+    notes.setSlide(slideIndex, slides[slideIndex]);
+  }
+
+  document.getElementById("prevBtn").addEventListener("click", () => showSlide(slideIndex - 1));
+  document.getElementById("nextBtn").addEventListener("click", () => showSlide(slideIndex + 1));
+  window.addEventListener("keydown", (e) => {
+    const k = e.key.toLowerCase();
+    if (k === "arrowleft") showSlide(slideIndex - 1);
+    if (k === "arrowright") showSlide(slideIndex + 1);
+  });
+
+  /** ---------------- Notes Engine ---------------- */
+  class NotesEngine {
+    constructor(canvas){
+      this.canvas = canvas;
+      this.ctx = canvas.getContext("2d", { alpha: true });
+
+      this.toolStatusEl = document.getElementById("toolStatus");
+      this.inputStatusEl = document.getElementById("inputStatus");
+      this.inkStatusEl  = document.getElementById("inkStatus");
+      this.dprStatusEl  = document.getElementById("dprStatus");
+
+      this.COLORS = [
+        { name:"Ice",   value:"rgba(235, 249, 255, .92)" },
+        { name:"Sky",   value:"rgba(120, 220, 255, .95)" },
+        { name:"Mint",  value:"rgba(150, 255, 220, .92)" },
+        { name:"Sun",   value:"rgba(255, 214, 140, .92)" },
+        { name:"Coral", value:"rgba(255, 140, 160, .90)" },
+        { name:"Ink",   value:"rgba(25,  30,  38,  .92)" }
+      ];
+      this.penColor = this.COLORS[0].value;
+
+      this.slideIndex = 0;
+      this.slideId = "0";
+      this.tool = "pen";
+      this.autoToolOverride = null;
+      this.penOnly = true;
+      this.inkEnabled = true;
+
+      this.mode = "FAST";
+      this.dpr = 1;
+
+      this.baseSize = 6;
+
+      this.drawing = false;
+      this.activePointerId = null;
+      this.activePointerType = null;
+      this.penInRangeUntil = 0;
+
+      this.rect = { left: 0, top: 0, width: 1, height: 1 };
+
+      this.queue = [];
+      this.raf = 0;
+
+      this.p0 = null;
+      this.p1 = null;
+
+      this.undoStack = [];
+      this.redoStack = [];
+      this.MAX_STACK = 50;
+
+      this.bindUI();
+      this.renderSwatches();
+
+      this.resizeCanvasBuffer();
+      this.load();
+      this.bindPointerToCanvas();
+      this.updateStatus();
+    }
+
+    setSlide(index, slideEl){
+      this.slideIndex = index;
+      const dataId = slideEl?.dataset?.id;
+      this.slideId = (dataId && String(dataId).trim()) ? String(dataId).trim() : String(index);
+      this.load();
+    }
+
+    storageKey(){
+      return `ink_${deckId}_${this.slideId}`;
+    }
+
+    computeDpr(){
+      const sys = window.devicePixelRatio || 1;
+      return this.mode === "HD" ? Math.min(2, sys) : Math.min(1.25, sys);
+    }
+
+    resizeCanvasBuffer(){
+      const r = this.canvas.getBoundingClientRect();
+      this.rect = { left: r.left, top: r.top, width: r.width, height: r.height };
+
+      const newDpr = this.computeDpr();
+      const w = Math.max(1, Math.floor(r.width * newDpr));
+      const h = Math.max(1, Math.floor(r.height * newDpr));
+
+      if (this.canvas.width !== w || this.canvas.height !== h || this.dpr !== newDpr){
+        this.dpr = newDpr;
+
+        const prev = (this.canvas.width && this.canvas.height) ? this.canvas.toDataURL("image/png") : null;
+
+        this.canvas.width = w;
+        this.canvas.height = h;
+
+        this.ctx.setTransform(1,0,0,1,0,0);
+        this.ctx.scale(this.dpr, this.dpr);
+        this.ctx.imageSmoothingEnabled = true;
+
+        if (prev){
+          const img = new Image();
+          img.onload = () => {
+            this.clear(false);
+            this.ctx.drawImage(img, 0, 0, this.rect.width, this.rect.height);
+          };
+          img.src = prev;
+        }
+      }
+    }
+
+    clear(save=true){
+      this.ctx.clearRect(0,0,this.rect.width,this.rect.height);
+      if (save) this.saveDebounced();
+    }
+
+    snapshotPush(){
+      try{
+        const data = this.canvas.toDataURL("image/png");
+        this.undoStack.push(data);
+        if (this.undoStack.length > this.MAX_STACK) this.undoStack.shift();
+        this.redoStack = [];
+      } catch {}
+    }
+
+    applyDataURL(dataUrl){
+      const img = new Image();
+      img.onload = () => {
+        this.ctx.clearRect(0,0,this.rect.width,this.rect.height);
+        this.ctx.drawImage(img, 0, 0, this.rect.width, this.rect.height);
+      };
+      img.src = dataUrl;
+    }
+
+    save(){
+      try{ localStorage.setItem(this.storageKey(), this.canvas.toDataURL("image/png")); } catch {}
+    }
+    saveDebounced(){
+      clearTimeout(this._saveT);
+      this._saveT = setTimeout(() => this.save(), 140);
+    }
+
+    load(){
+      this.undoStack = [];
+      this.redoStack = [];
+      this.resizeCanvasBuffer();
+      this.clear(false);
+      const data = localStorage.getItem(this.storageKey());
+      if (data) this.applyDataURL(data);
+    }
+
+    renderSwatches(){
+      const sw = document.getElementById("swatches");
+      sw.innerHTML = "";
+      this.COLORS.forEach(c => {
+        const d = document.createElement("div");
+        d.className = "swatch" + (c.value === this.penColor ? " active" : "");
+        d.title = c.name;
+        d.style.background = c.value;
+        d.addEventListener("click", () => {
+          this.penColor = c.value;
+          this.setTool("pen");
+          this.renderSwatches();
+        });
+        sw.appendChild(d);
+      });
+    }
+
+    setTool(t){
+      this.tool = t;
+      document.getElementById("penBtn").classList.toggle("active", t==="pen");
+      document.getElementById("eraserBtn").classList.toggle("active", t==="eraser");
+      this.updateStatus();
+    }
+
+    setPenOnly(on){
+      this.penOnly = on;
+      document.getElementById("penOnlyBtn").classList.toggle("active", on);
+      document.getElementById("allowTouchBtn").classList.toggle("active", !on);
+      this.updateStatus();
+    }
+
+    setInkEnabled(on){
+      this.inkEnabled = on;
+      document.getElementById("inkOnBtn").classList.toggle("active", on);
+      document.getElementById("inkOffBtn").classList.toggle("active", !on);
+      this.canvas.classList.toggle("passThrough", !on);
+      this.updateStatus();
+      if (!on) this.cancelStroke();
+    }
+
+    setMode(mode){
+      this.mode = mode;
+      document.getElementById("fastBtn").classList.toggle("active", mode==="FAST");
+      document.getElementById("hdBtn").classList.toggle("active", mode==="HD");
+      this.resizeCanvasBuffer();
+      this.updateStatus();
+    }
+
+    updateStatus(){
+      const effective = this.autoToolOverride || this.tool;
+      this.toolStatusEl.innerHTML = `Tool: <b>${effective === "eraser" ? "Radierer" : "Stift"}</b>`;
+      this.inputStatusEl.innerHTML = `Input: <b>${this.penOnly ? "Pen-only" : "Touch erlaubt"}</b>`;
+      this.inkStatusEl.innerHTML = `Ink: <b>${this.inkEnabled ? "AN" : "AUS"}</b>`;
+      this.dprStatusEl.innerHTML = `Render: <b>${this.mode}</b>`;
+    }
+
+    isSurfaceEraser(ev){
+      return ev.pointerType === "pen" && (ev.button === 5 || (typeof ev.buttons === "number" && (ev.buttons & 32) === 32));
+    }
+
+    shouldIgnore(ev){
+      if (!this.inkEnabled) return true;
+      if (this.penOnly && ev.pointerType === "touch") return true;
+
+      const now = performance.now();
+      const penInRange = now < this.penInRangeUntil;
+      if (ev.pointerType === "touch" && penInRange) return true;
+      if (ev.pointerType === "touch" && this.activePointerType === "pen") return true;
+      return false;
+    }
+
+    toLocal(ev){
+      const r = this.canvas.getBoundingClientRect();
+      this.rect = { left: r.left, top: r.top, width: r.width, height: r.height };
+      return { x: ev.clientX - this.rect.left, y: ev.clientY - this.rect.top };
+    }
+
+    applyBrush(mode){
+      this.ctx.lineCap = "round";
+      this.ctx.lineJoin = "round";
+      this.ctx.miterLimit = 1;
+
+      const penW = Math.min(60, Math.max(1, this.baseSize));
+      if (mode === "eraser"){
+        this.ctx.globalCompositeOperation = "destination-out";
+        this.ctx.strokeStyle = "rgba(0,0,0,1)";
+        this.ctx.lineWidth = Math.min(1000, penW * 16); // Eraser = 16×
+      } else {
+        this.ctx.globalCompositeOperation = "source-over";
+        this.ctx.strokeStyle = this.penColor;
+        this.ctx.lineWidth = penW;
+      }
+    }
+
+    drawSmoothPoint(pt){
+      if (!this.p0){
+        this.p0 = { x: pt.x, y: pt.y };
+        this.p1 = { x: pt.x, y: pt.y };
+        this.ctx.beginPath();
+        this.ctx.moveTo(pt.x, pt.y);
+        this.ctx.lineTo(pt.x + 0.01, pt.y + 0.01);
+        this.ctx.stroke();
+        return;
+      }
+      const mid = { x: (this.p1.x + pt.x)/2, y: (this.p1.y + pt.y)/2 };
+      this.ctx.beginPath();
+      this.ctx.moveTo(this.p0.x, this.p0.y);
+      this.ctx.quadraticCurveTo(this.p1.x, this.p1.y, mid.x, mid.y);
+      this.ctx.stroke();
+      this.p0 = mid;
+      this.p1 = { x: pt.x, y: pt.y };
+    }
+
+    enqueueFromEvent(ev){
+      const list = (typeof ev.getCoalescedEvents === "function") ? ev.getCoalescedEvents() : [ev];
+      const isE = this.isSurfaceEraser(ev);
+      for (const e of list){
+        const p = this.toLocal(e);
+        this.queue.push({ x: p.x, y: p.y, isEraser: isE });
+      }
+      if (!this.raf) this.raf = requestAnimationFrame(() => this.flush());
+    }
+
+    flush(){
+      this.raf = 0;
+      if (!this.drawing || this.queue.length === 0) { this.queue.length = 0; return; }
+      for (let i=0;i<this.queue.length;i++){
+        const pt = this.queue[i];
+        const mode = pt.isEraser ? "eraser" : (this.autoToolOverride || this.tool);
+        this.applyBrush(mode);
+        this.drawSmoothPoint(pt);
+      }
+      this.queue.length = 0;
+    }
+
+    begin(ev){
+      if (this.shouldIgnore(ev)) return;
+      if (this.activePointerId !== null) return;
+
+      if (ev.pointerType === "pen") this.penInRangeUntil = performance.now() + 1400;
+
+      this.activePointerId = ev.pointerId;
+      this.activePointerType = ev.pointerType;
+      this.drawing = true;
+
+      try { this.canvas.setPointerCapture(ev.pointerId); } catch {}
+
+      this.snapshotPush();
+
+      this.autoToolOverride = this.isSurfaceEraser(ev) ? "eraser" : null;
+      this.updateStatus();
+
+      const p = this.toLocal(ev);
+      this.p0 = null; this.p1 = null;
+      this.queue.length = 0;
+
+      const mode = this.autoToolOverride || this.tool;
+      this.applyBrush(mode);
+      this.drawSmoothPoint(p);
+    }
+
+    move(ev){
+      if (ev.pointerType === "pen" && !this.drawing) this.penInRangeUntil = performance.now() + 1400;
+      if (!this.drawing || ev.pointerId !== this.activePointerId) return;
+      if (this.shouldIgnore(ev)) return;
+
+      this.autoToolOverride = this.isSurfaceEraser(ev) ? "eraser" : null;
+      this.updateStatus();
+      this.enqueueFromEvent(ev);
+    }
+
+    end(ev){
+      if (ev.pointerId !== this.activePointerId) return;
+      if (this.queue.length) this.flush();
+
+      this.drawing = false;
+      this.activePointerId = null;
+      this.activePointerType = null;
+      this.autoToolOverride = null;
+
+      this.queue.length = 0;
+      if (this.raf) { cancelAnimationFrame(this.raf); this.raf = 0; }
+
+      // kein Tail-Finalizing => kein „bleibender Punkt“
+      this.p0 = null; this.p1 = null;
+
+      this.updateStatus();
+      this.saveDebounced();
+    }
+
+    cancelStroke(){
+      this.drawing = false;
+      this.activePointerId = null;
+      this.activePointerType = null;
+      this.autoToolOverride = null;
+      this.queue.length = 0;
+      if (this.raf) { cancelAnimationFrame(this.raf); this.raf = 0; }
+      this.p0 = null; this.p1 = null;
+      this.updateStatus();
+    }
+
+    bindUI(){
+      document.getElementById("penBtn").addEventListener("click", () => this.setTool("pen"));
+      document.getElementById("eraserBtn").addEventListener("click", () => this.setTool("eraser"));
+
+      const sizeEl = document.getElementById("size");
+      const sizeLabel = document.getElementById("sizeLabel");
+      sizeLabel.textContent = sizeEl.value + "px";
+      this.baseSize = +sizeEl.value;
+      sizeEl.addEventListener("input", () => {
+        this.baseSize = +sizeEl.value;
+        sizeLabel.textContent = sizeEl.value + "px";
+      });
+
+      document.getElementById("penOnlyBtn").addEventListener("click", () => this.setPenOnly(true));
+      document.getElementById("allowTouchBtn").addEventListener("click", () => this.setPenOnly(false));
+
+      document.getElementById("inkOnBtn").addEventListener("click", () => this.setInkEnabled(true));
+      document.getElementById("inkOffBtn").addEventListener("click", () => this.setInkEnabled(false));
+
+      document.getElementById("fastBtn").addEventListener("click", () => this.setMode("FAST"));
+      document.getElementById("hdBtn").addEventListener("click", () => this.setMode("HD"));
+
+      document.getElementById("clearBtn").addEventListener("click", () => {
+        this.snapshotPush();
+        this.clear(true);
+      });
+
+      document.getElementById("undoBtn").addEventListener("click", () => {
+        if (!this.undoStack.length) return;
+        try{
+          const cur = this.canvas.toDataURL("image/png");
+          this.redoStack.push(cur);
+          const prev = this.undoStack.pop();
+          this.applyDataURL(prev);
+          this.saveDebounced();
+        } catch {}
+      });
+
+      document.getElementById("redoBtn").addEventListener("click", () => {
+        if (!this.redoStack.length) return;
+        try{
+          const cur = this.canvas.toDataURL("image/png");
+          this.undoStack.push(cur);
+          const next = this.redoStack.pop();
+          this.applyDataURL(next);
+          this.saveDebounced();
+        } catch {}
+      });
+
+      document.getElementById("exportBtn").addEventListener("click", () => {
+        const a = document.createElement("a");
+        a.download = `notes_${deckId}_${this.slideId}.png`;
+        a.href = this.canvas.toDataURL("image/png");
+        a.click();
+      });
+
+      window.addEventListener("keydown", (e) => {
+        const k = e.key.toLowerCase();
+        if ((e.ctrlKey || e.metaKey) && k === "z") { e.preventDefault(); document.getElementById("undoBtn").click(); }
+        if ((e.ctrlKey || e.metaKey) && k === "y") { e.preventDefault(); document.getElementById("redoBtn").click(); }
+        if (k === "i") this.setInkEnabled(!this.inkEnabled);
+      });
+    }
+
+    bindPointerToCanvas(){
+      this.canvas.addEventListener("pointerdown", (ev) => this.begin(ev));
+      this.canvas.addEventListener("pointermove", (ev) => this.move(ev));
+      this.canvas.addEventListener("pointerup", (ev) => this.end(ev));
+      this.canvas.addEventListener("pointercancel", (ev) => this.end(ev));
+      this.canvas.addEventListener("pointerleave", (ev) => { if (this.drawing) this.end(ev); });
+    }
+  }
+
+  const notes = new NotesEngine(inkCanvas);
+
+  // init
+  measureDock();
+  requestAnimationFrame(measureDock);
+
+  totalEl.textContent = String(total);
+
+  // Load deck
+  loadContent(deckUrl).then(() => {
+    // ensure dock height with new title lengths etc.
+    requestAnimationFrame(measureDock);
+  });
+
+})();
+</script>
+</body>
+</html>
