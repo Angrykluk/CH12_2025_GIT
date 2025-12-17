@@ -1,0 +1,312 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <title>Beispielstunde: Katalysatoren (Lehrer- & Schülerversuche)</title>
+</head>
+<body>
+
+  <!--
+    Deck für den Player:
+    - Jede Folie: <section class="slide" ...>
+    - data-id: stabil für Ink-Notizen
+    - data-title: erscheint im Dock
+    - data-bg: optional (dezent im Hintergrund)
+    Quellenbasis: V7-175 (Uni Göttingen), v. a. S. 8 (V2) & S. 10 (V3) sowie V6 (S. 15–16).
+  -->
+
+  <section class="slide" data-id="katS_00" data-title="Titel & Lernziele"
+    data-bg="https://commons.wikimedia.org/wiki/Special:FilePath/CatalysisScheme.png">
+    <div class="badge">Chemie · Klassen 7/8 · Katalyse</div>
+    <h1>Katalysatoren: heterogen · homogen · enzymatisch</h1>
+    <p>
+      Heute untersuchen wir drei Versuche (1 Lehrerversuch, 2 Schülerversuche) und ordnen sie
+      den Katalyse-Typen zu. Außerdem üben wir: <b>Beobachten</b> → <b>Deuten</b> → <b>Begründen</b>.
+    </p>
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px;">
+      <div style="background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.10); border-radius:16px; padding:14px;">
+        <h3 style="margin:0 0 6px;">Lernziele</h3>
+        <ul style="margin:0 0 0 18px;">
+          <li>du erkennst, dass ein Katalysator die Reaktion beschleunigt, aber <b>nicht verbraucht</b> wird</li>
+          <li>du unterscheidest <b>heterogene</b>, <b>homogene</b> und <b>enzymatische</b> Katalyse</li>
+          <li>du formulierst Deutungen mit Fachbegriffen (z. B. „Gasentwicklung“, „Farbwechsel“)</li>
+        </ul>
+      </div>
+      <div style="background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.10); border-radius:16px; padding:14px;">
+        <h3 style="margin:0 0 6px;">Arbeitsmodus</h3>
+        <p style="margin:0; color:rgba(240,248,255,.82)">
+          Schülerversuche in <b>3er Gruppen</b>. Ergebnisse in der Tabelle sichern (später gemeinsam).
+        </p>
+        <p style="margin:10px 0 0; color:rgba(240,248,255,.70)">
+          Ink-Tipp: Nutzt <b>Sky</b> für Beobachtungen und <b>Sun</b> für Deutung.
+        </p>
+      </div>
+    </div>
+    <p style="margin-top:12px; font-size:12px; color:rgba(240,248,255,.55)">
+      Hintergrundgrafik: Wikimedia Commons („CatalysisScheme.png“).
+    </p>
+  </section>
+
+  <section class="slide" data-id="katS_01" data-title="Einstieg: Beobachten & Deuten">
+    <div class="badge">Einstieg</div>
+    <h2>Was macht ein Katalysator „eigentlich“?</h2>
+    <div style="display:grid; grid-template-columns: 1.1fr .9fr; gap:16px; align-items:start;">
+      <div>
+        <p>
+          Merke: Katalysatoren verändern den <b>Reaktionsweg</b> (und senken damit die Aktivierungsenergie).
+          Sie verändern aber nicht „wie viel am Ende möglich ist“ (Gleichgewichtslage bleibt).
+        </p>
+        <div style="background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.10); border-radius:16px; padding:14px;">
+          <h3 style="margin:0 0 6px;">Aufgabe (vor dem Versuch)</h3>
+          <ol style="margin:0 0 0 18px;">
+            <li>Notiere: Welche <b>Beobachtungen</b> erwartest du?</li>
+            <li>Woran würdest du erkennen, dass ein Stoff „katalysiert“?</li>
+          </ol>
+        </div>
+      </div>
+      <div style="background:rgba(255,255,255,.03); border:1px dashed rgba(255,255,255,.20); border-radius:16px; padding:14px; min-height:260px;">
+        <h3 style="margin:0 0 8px;">Platz für Ink: Energieprofil</h3>
+        <p style="margin:0; color:rgba(240,248,255,.70)">Skizziere: ohne Katalysator / mit Katalysator (Aktivierungsenergie).</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 1) Lehrerversuch: Seite 8 -> V2 Homogene Katalyse von Tartrat -->
+  <section class="slide" data-id="katS_02" data-title="Lehrerversuch: Tartrat (homogen)"
+    data-bg="https://commons.wikimedia.org/wiki/Special:FilePath/Cobalt(II)_chloride_hexahydrate.jpg">
+    <div class="badge">Lehrerversuch</div>
+    <h2>V2 – Homogene Katalyse: Tartrat + CoCl₂ (S. 8)</h2>
+
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px; align-items:start;">
+      <div style="background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.10); border-radius:16px; padding:14px;">
+        <h3 style="margin:0 0 6px;">Versuchsaufbau (vereinfacht)</h3>
+        <ul style="margin:0 0 0 18px;">
+          <li>Lösung A: Seignettesalz in Wasser</li>
+          <li>Lösung B: Cobalt(II)-chlorid in Wasser</li>
+          <li>Lösung C: H₂O₂-Lösung verdünnt</li>
+          <li>A + B mischen, auf <b>2 Becher</b> aufteilen</li>
+          <li>Nur in <b>einen</b> Becher: Lösung C dazugeben → beobachten</li>
+        </ul>
+      </div>
+
+      <div style="background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.10); border-radius:16px; padding:14px;">
+        <h3 style="margin:0 0 6px;">Worauf achten?</h3>
+        <ul style="margin:0 0 0 18px;">
+          <li><b>Farbänderung</b> (rosa ↔ grün)</li>
+          <li><b>Bläschen</b> (Gasentwicklung)</li>
+          <li>Unterschied <b>mit</b> vs. <b>ohne</b> Katalysator</li>
+        </ul>
+        <p style="margin:10px 0 0; color:rgba(240,248,255,.75)">
+          <b>Schülerauftrag:</b> Beobachtet genau und versucht eine <b>Deutung</b>:
+          Was ist der Katalysator? Woran erkennt man, dass er nicht verbraucht wird?
+        </p>
+      </div>
+    </div>
+
+    <p style="margin-top:12px; font-size:12px; color:rgba(240,248,255,.55)">
+      Hinweis: Der Hintergrund ist ein Beispielbild (CoCl₂); der Versuch folgt dem PDF V7-175, Seite 8.
+    </p>
+  </section>
+
+  <section class="slide" data-id="katS_03" data-title="Lehrerversuch: Zuordnung">
+    <div class="badge">Auswertung (kurz)</div>
+    <h2>Zuordnung des Lehrerversuchs</h2>
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px; align-items:start;">
+      <div style="background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.10); border-radius:16px; padding:14px;">
+        <h3 style="margin:0 0 6px;">Fragen</h3>
+        <ol style="margin:0 0 0 18px;">
+          <li>Welche Probe reagiert? Woran siehst du das?</li>
+          <li>Was ist der <b>Katalysator</b>?</li>
+          <li>Warum ist das <b>homogene</b> Katalyse?</li>
+        </ol>
+      </div>
+      <div style="background:rgba(255,255,255,.03); border:1px dashed rgba(255,255,255,.20); border-radius:16px; padding:14px; min-height:260px;">
+        <h3 style="margin:0 0 8px;">Platz für Ink: Begründung</h3>
+        <p style="margin:0; color:rgba(240,248,255,.70)">
+          Stichworte: „gleiche Phase“, „gelöst“, „Farbwechsel“, „Gasentwicklung“ …
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2) Schülerstation A: Schlange des Pharaos (mit/ohne Sand) – Isopropanol statt Ethanol -->
+  <section class="slide" data-id="katS_04" data-title="Station A: Schlange des Pharaos">
+    <div class="badge">Station A · Schülerversuch</div>
+    <h2>V6 – Die katalysierte Schlange des Pharao (mit/ohne Sand)</h2>
+
+    <div style="display:grid; grid-template-columns: 1.05fr .95fr; gap:16px; align-items:start;">
+      <div style="background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.10); border-radius:16px; padding:14px;">
+        <h3 style="margin:0 0 6px;">Material / Chemikalien</h3>
+        <ul style="margin:0 0 0 18px;">
+          <li>2 Abdampfschalen</li>
+          <li>Sand (einmal als „Berg“)</li>
+          <li>2× Emser Pastillen je Ansatz</li>
+          <li><b>Isopropanol</b> (statt Ethanol)</li>
+          <li>Zündquelle (Lehrerfreigabe / Sicherheitsregeln)</li>
+        </ul>
+        <p style="margin:10px 0 0; color:rgba(240,248,255,.72); font-size:12px;">
+          Achtung: brennbar! Schutzbrille, Haare zusammen, freie Fläche, Löschmittel bereit.
+        </p>
+      </div>
+
+      <div style="background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.10); border-radius:16px; padding:14px;">
+        <h3 style="margin:0 0 6px;">Durchführung (kurz)</h3>
+        <ol style="margin:0 0 0 18px;">
+          <li>Pastillen kurz in Isopropanol „anfeuchten“ (Vorbereitung).</li>
+          <li>Schale 1: Sandberg + Isopropanol tränken, Pastillen oben stapeln.</li>
+          <li>Schale 2: Pastillen + wenig Isopropanol (ohne Sand).</li>
+          <li>Beide Ansätze entzünden (nacheinander, sicher).</li>
+        </ol>
+        <p style="margin:10px 0 0; color:rgba(240,248,255,.82)">
+          <b>Beobachtung:</b> Vergleicht die Länge/„Wucht“ der Schlange mit und ohne Sand.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" data-id="katS_05" data-title="Station A: Auswertung & Typ">
+    <div class="badge">Station A · Auswertung</div>
+    <h2>Schlange des Pharaos – Deutung & Zuordnung</h2>
+
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px; align-items:start;">
+      <div style="background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.10); border-radius:16px; padding:14px;">
+        <h3 style="margin:0 0 6px;">Leitfragen</h3>
+        <ul style="margin:0 0 0 18px;">
+          <li>Warum entsteht mit Sand eine längere Schlange?</li>
+          <li>Welche Rolle spielt das entstehende Gas (Treibmittel)?</li>
+          <li>Was ist hier der „Katalysator“?</li>
+        </ul>
+        <p style="margin:10px 0 0; color:rgba(240,248,255,.82)">
+          <b>Zuordnung:</b> <span class="pill">heterogen</span> / <span class="pill">homogen</span> / <span class="pill">enzymatisch</span>
+        </p>
+      </div>
+
+      <div style="background:rgba(255,255,255,.03); border:1px dashed rgba(255,255,255,.20); border-radius:16px; padding:14px; min-height:260px;">
+        <h3 style="margin:0 0 8px;">Platz für Ink: Erklärungsskizze</h3>
+        <p style="margin:0; color:rgba(240,248,255,.70)">
+          Zeichne: Sand (Feststoff) + Reaktion an/mit Inhaltsstoffen der Pastille → mehr „Schlange“.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3) Schülerstation B: Seite 10 -> Enzymatische Katalyse von H2O2 -->
+  <section class="slide" data-id="katS_06" data-title="Station B: Kartoffel + H2O2 (Enzym)">
+    <div class="badge">Station B · Schülerversuch</div>
+    <h2>V3 – Enzymatische Katalyse: H₂O₂ auf Kartoffel (S. 10)</h2>
+
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px; align-items:start;">
+      <div style="background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.10); border-radius:16px; padding:14px;">
+        <h3 style="margin:0 0 6px;">Material / Chemikalien</h3>
+        <ul style="margin:0 0 0 18px;">
+          <li>2 Uhrgläser</li>
+          <li>1 rohe Kartoffel (halbiert)</li>
+          <li>1 gekochte Kartoffel (halbiert)</li>
+          <li>Wasserstoffperoxid-Lösung (w≈0,3)</li>
+        </ul>
+        <p style="margin:10px 0 0; color:rgba(240,248,255,.72); font-size:12px;">
+          Achtung: H₂O₂ reizend/oxidierend – Schutzbrille, wenig Tropfen, Hände waschen.
+        </p>
+      </div>
+
+      <div style="background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.10); border-radius:16px; padding:14px;">
+        <h3 style="margin:0 0 6px;">Durchführung</h3>
+        <ol style="margin:0 0 0 18px;">
+          <li>Kartoffeln halbieren und Schnittfläche nach oben.</li>
+          <li>Auf jede Schnittfläche wenige Tropfen H₂O₂ geben.</li>
+          <li>Beobachten und vergleichen: roh vs. gekocht.</li>
+        </ol>
+        <p style="margin:10px 0 0; color:rgba(240,248,255,.82)">
+          <b>Beobachtung:</b> Wo entstehen Bläschen? Wie stark? Wie schnell?
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" data-id="katS_07" data-title="Station B: Auswertung & Typ">
+    <div class="badge">Station B · Auswertung</div>
+    <h2>Kartoffel + H₂O₂ – Deutung & Zuordnung</h2>
+
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px; align-items:start;">
+      <div style="background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.10); border-radius:16px; padding:14px;">
+        <h3 style="margin:0 0 6px;">Leitfragen</h3>
+        <ul style="margin:0 0 0 18px;">
+          <li>Welches Gas entstehen die Bläschen wahrscheinlich?</li>
+          <li>Warum reagiert die <b>gekochte</b> Kartoffel viel weniger?</li>
+          <li>Was ist hier der „Katalysator“?</li>
+        </ul>
+        <p style="margin:10px 0 0; color:rgba(240,248,255,.82)">
+          <b>Zuordnung:</b> <span class="pill">heterogen</span> / <span class="pill">homogen</span> / <span class="pill">enzymatisch</span>
+        </p>
+      </div>
+
+      <div style="background:rgba(255,255,255,.03); border:1px dashed rgba(255,255,255,.20); border-radius:16px; padding:14px; min-height:260px;">
+        <h3 style="margin:0 0 8px;">Platz für Ink: Erklärung</h3>
+        <p style="margin:0; color:rgba(240,248,255,.70)">
+          Stichworte: „Enzym (Catalase)“, „Denaturierung durch Hitze“, „O₂-Entwicklung“ …
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Gemeinsame Sicherung -->
+  <section class="slide" data-id="katS_08" data-title="Sicherung: Tabelle">
+    <div class="badge">Sicherung</div>
+    <h2>Ergebnissicherung: Zuordnung der Katalyse-Typen</h2>
+
+    <div style="background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.10); border-radius:16px; padding:14px;">
+      <p style="margin:0 0 10px; color:rgba(240,248,255,.82)">
+        Füllt die Tabelle. Begründet die Zuordnung jeweils mit <b>1–2 Sätzen</b>.
+      </p>
+
+      <div style="display:grid; grid-template-columns: 1.1fr .9fr; gap:14px; align-items:start;">
+        <div style="background:rgba(255,255,255,.03); border:1px dashed rgba(255,255,255,.20); border-radius:16px; padding:14px; min-height:320px;">
+          <h3 style="margin:0 0 8px;">Tabelle (hier direkt mit Ink ausfüllen)</h3>
+          <p style="margin:0; color:rgba(240,248,255,.70)">
+            Spaltenvorschlag:
+            <b>Versuch</b> · <b>Beobachtung</b> · <b>Katalysator</b> · <b>Typ</b> · <b>Begründung</b>
+          </p>
+          <p style="margin-top:10px; color:rgba(240,248,255,.70)">
+            Zeilen:
+            <br>1) Lehrerversuch: Tartrat + CoCl₂
+            <br>2) Station A: Schlange des Pharaos (mit/ohne Sand)
+            <br>3) Station B: Kartoffel + H₂O₂ (roh/gekocht)
+          </p>
+        </div>
+
+        <div style="background:rgba(255,255,255,.03); border:1px dashed rgba(255,255,255,.20); border-radius:16px; padding:14px; min-height:320px;">
+          <h3 style="margin:0 0 8px;">Merksätze</h3>
+          <ul style="margin:0 0 0 18px;">
+            <li><b>Homogen</b>: Katalysator und Reaktionspartner in <b>gleicher Phase</b> (z. B. alles gelöst).</li>
+            <li><b>Heterogen</b>: unterschiedliche Phasen, Reaktion oft an <b>Oberflächen</b>.</li>
+            <li><b>Enzymatisch</b>: Katalysator ist ein <b>Enzym</b> (wärmeempfindlich/denaturierbar).</li>
+          </ul>
+          <p style="margin-top:10px; color:rgba(240,248,255,.70)">
+            Optional: Exportiert eure Notizen als PNG (Export-Button).
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" data-id="katS_09" data-title="Abschluss: Exit Ticket">
+    <div class="badge">Abschluss</div>
+    <h2>Exit Ticket (2 Minuten)</h2>
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px; align-items:start;">
+      <div style="background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.10); border-radius:16px; padding:14px;">
+        <h3 style="margin:0 0 6px;">1) Kurz erklären</h3>
+        <p style="margin:0; color:rgba(240,248,255,.82)">
+          Woran erkennt man, dass ein Katalysator <b>nicht verbraucht</b> wird?
+        </p>
+      </div>
+      <div style="background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.10); border-radius:16px; padding:14px;">
+        <h3 style="margin:0 0 6px;">2) Zuordnen</h3>
+        <p style="margin:0; color:rgba(240,248,255,.82)">
+          Nenne ein Beispiel aus der Stunde und ordne es einem Katalyse-Typ zu (mit Begründung).
+        </p>
+      </div>
+    </div>
+  </section>
+
+</body>
+</html>
